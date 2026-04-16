@@ -111,12 +111,12 @@ namespace Steamworks {
 			}
 		}
 
-		public static bool Init() {
+		public static bool Init(out string OutSteamErrMsg) {
 			InteropHelp.TestIfPlatformSupported();
-
-			string SteamErrorMsg;
-			return InitEx(out SteamErrorMsg) == ESteamAPIInitResult.k_ESteamAPIInitResult_OK;
+			
+			return InitEx(out OutSteamErrMsg) == ESteamAPIInitResult.k_ESteamAPIInitResult_OK;
 		}
+		
 
 		// SteamAPI_Shutdown should be called during process shutdown if possible.
 		public static void Shutdown() {

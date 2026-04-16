@@ -10,6 +10,7 @@
 #endif
 
 using UnityEngine;
+using static Steamworks.ESteamAPIInitResult;
 #if !DISABLESTEAMWORKS
 using System.Collections;
 using Steamworks;
@@ -25,7 +26,7 @@ public class SteamManager : MonoBehaviour {
 	protected static bool s_EverInitialized = false;
 
 	protected static SteamManager s_instance;
-	protected static SteamManager Instance {
+	public static SteamManager Instance {
 		get {
 			if (s_instance == null) {
 				return new GameObject("SteamManager").AddComponent<SteamManager>();
@@ -80,11 +81,11 @@ public class SteamManager : MonoBehaviour {
 		DontDestroyOnLoad(gameObject);
 
 		if (!Packsize.Test()) {
-			Debug.LogError("[Steamworks.NET] Packsize Test returned false, the wrong version of Steamworks.NET is being run in this platform.", this);
+			TextDebugManager.Instance.addError("[Steamworks.NET] Packsize Test returned false, the wrong version of Steamworks.NET is being run in this platform.", this);
 		}
 
 		if (!DllCheck.Test()) {
-			Debug.LogError("[Steamworks.NET] DllCheck Test returned false, One or more of the Steamworks binaries seems to be the wrong version.", this);
+			TextDebugManager.Instance.addError("[Steamworks.NET] DllCheck Test returned false, One or more of the Steamworks binaries seems to be the wrong version.", this);
 		}
 
 		try {
@@ -97,14 +98,14 @@ public class SteamManager : MonoBehaviour {
 			// remove steam_appid.txt from the game depot. eg: "(AppId_t)480" or "new AppId_t(480)".
 			// See the Valve documentation for more information: https://partner.steamgames.com/doc/sdk/api#initialization_and_shutdown
 			if (SteamAPI.RestartAppIfNecessary(AppId_t.Invalid)) {
-				Debug.Log("[Steamworks.NET] Shutting down because RestartAppIfNecessary returned true. Steam will restart the application.");
+				TextDebugManager.Instance.addStatus("[Steamworks.NET] Shutting down because RestartAppIfNecessary returned true. Steam will restart the application.");
 
 				Application.Quit();
 				return;
 			}
 		}
 		catch (System.DllNotFoundException e) { // We catch this exception here, as it will be the first occurrence of it.
-			Debug.LogError("[Steamworks.NET] Could not load [lib]steam_api.dll/so/dylib. It's likely not in the correct location. Refer to the README for more details.\n" + e, this);
+			TextDebugManager.Instance.addError("[Steamworks.NET] Could not load [lib]steam_api.dll/so/dylib. It's likely not in the correct location. Refer to the README for more details.\n" + e, this);
 
 			Application.Quit();
 			return;
@@ -119,12 +120,15 @@ public class SteamManager : MonoBehaviour {
 		// [*] Your App ID is not completely set up, i.e. in Release State: Unavailable, or it's missing default packages.
 		// Valve's documentation for this is located here:
 		// https://partner.steamgames.com/doc/sdk/api#initialization_and_shutdown
-		m_bInitialized = SteamAPI.Init();
+		string OutSteamErrMsg;
+		m_bInitialized = SteamAPI.Init(out OutSteamErrMsg);
+		
 		if (!m_bInitialized) {
-			Debug.LogError("[Steamworks.NET] SteamAPI_Init() failed. Refer to Valve's documentation or the comment above this line for more information.", this);
-
+			TextDebugManager.Instance.addError("[Steamworks.NET] SteamAPI_Init() failed. Refer to Valve's documentation or the comment above this line for more information.", this);
+			TextDebugManager.Instance.addError(OutSteamErrMsg);
 			return;
 		}
+		TextDebugManager.Instance.addStatus("Steamworks.NET Initialized!");
 
 		s_EverInitialized = true;
 	}
@@ -179,4 +183,36 @@ public class SteamManager : MonoBehaviour {
 		}
 	}
 #endif // !DISABLESTEAMWORKS
+	
+	public HAuthTicket RequestAuthTicket(byte[] pTicket)
+	{
+		
+		
+		if (!Initialized)
+		{
+			Debug.LogError("Steam not initialized!");
+			return HAuthTicket.Invalid;	
+		}
+		
+		
+		
+		int cbMaxTicket = pTicket.Length;
+		uint pcbTicket;
+		SteamNetworkingIdentity identity = new SteamNetworkingIdentity();
+		identity.Clear();
+		
+			
+		return SteamUser.GetAuthSessionTicket(pTicket, cbMaxTicket, out pcbTicket, ref identity);
+		
+		// if (authTicket == HAuthTicket.Invalid)
+		// {
+		//
+		// 	UserManager.Instance.addError("Failed to get auth ticket!");
+		// 	return;
+		// }
+		//
+		// string hexTicket = System.BitConverter.ToString(pTicket, 0, (int)cbMaxTicket).Replace("-", "");
+		//
+		// UserManager.Instance.addStatus($"Auth Ticket (HEX): {hexTicket}");
+	}
 }
