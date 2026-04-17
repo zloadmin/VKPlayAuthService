@@ -9,6 +9,7 @@
 #define DISABLESTEAMWORKS
 #endif
 
+using System;
 using UnityEngine;
 using static Steamworks.ESteamAPIInitResult;
 #if !DISABLESTEAMWORKS
@@ -184,35 +185,50 @@ public class SteamManager : MonoBehaviour {
 	}
 #endif // !DISABLESTEAMWORKS
 	
-	public HAuthTicket RequestAuthTicket(byte[] pTicket)
+	public string RequestAuthTicket()
 	{
-		
-		
-		if (!Initialized)
+		try
 		{
-			Debug.LogError("Steam not initialized!");
-			return HAuthTicket.Invalid;	
-		}
-		
-		
-		
-		int cbMaxTicket = pTicket.Length;
-		uint pcbTicket;
-		SteamNetworkingIdentity identity = new SteamNetworkingIdentity();
-		identity.Clear();
-		
+			if (!Initialized)
+			{
+				TextDebugManager.Instance.addError("Steam not initialized!");
+				return string.Empty;
+			}
+
+			byte[] pTicket = new byte[1024];
+			uint pcbTicket;
+
+			SteamNetworkingIdentity identity = new SteamNetworkingIdentity();
+			identity.Clear();
+
+			HAuthTicket authTicket = SteamUser.GetAuthSessionTicket(
+				pTicket,
+				pTicket.Length,
+				out pcbTicket,
+				ref identity
+			);
+
+			if (authTicket == HAuthTicket.Invalid || pcbTicket == 0)
+			{
+				TextDebugManager.Instance.addError("Failed to get auth ticket!");
+				return string.Empty;
+			}
+
+			string hexTicket = System.BitConverter
+				.ToString(pTicket, 0, (int)pcbTicket)
+				.Replace("-", "");
+			TextDebugManager.Instance.addStatus("[Steam ticket hex] " + hexTicket.Substring(0,5) + "...");
+			TextDebugManager.Instance.WriteLog("[Steam ticket hex] " + hexTicket);
 			
-		return SteamUser.GetAuthSessionTicket(pTicket, cbMaxTicket, out pcbTicket, ref identity);
-		
-		// if (authTicket == HAuthTicket.Invalid)
-		// {
-		//
-		// 	UserManager.Instance.addError("Failed to get auth ticket!");
-		// 	return;
-		// }
-		//
-		// string hexTicket = System.BitConverter.ToString(pTicket, 0, (int)cbMaxTicket).Replace("-", "");
-		//
-		// UserManager.Instance.addStatus($"Auth Ticket (HEX): {hexTicket}");
+			string base64 = Convert.ToBase64String(pTicket, 0, (int)pcbTicket);
+			TextDebugManager.Instance.addStatus("[Steam ticket base64] " + base64.Substring(0,5) + "...");
+			TextDebugManager.Instance.WriteLog("[Steam ticket base64] " + base64);
+			return hexTicket;
+		}
+		catch (Exception e)
+		{
+			TextDebugManager.Instance.addError("Auth ticket error: " + e.Message);
+			return string.Empty;
+		}
 	}
 }

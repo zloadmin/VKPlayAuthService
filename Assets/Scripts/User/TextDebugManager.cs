@@ -1,4 +1,5 @@
 using System;
+using System.IO;
 using Steamworks;
 using UnityEngine;
 using UnityEngine.UI;
@@ -49,12 +50,14 @@ public class TextDebugManager : MonoBehaviour
     {
         errorText =  GameObject.Find("ErrorText").GetComponent<Text>();
         statusText =  GameObject.Find("StatusText").GetComponent<Text>();
+        addStatus("Log folder " +  Application.persistentDataPath);
         // if (errorText is not null) errorText.text = "";
         // if (statusText is not null) statusText.text = "";
     }
 
     public void addError(string msg, Object context)
     {
+        WriteLog("Error: " + msg);
         Debug.LogError("User manager " + msg, context);
         if (errorText is not null)
         {
@@ -64,6 +67,7 @@ public class TextDebugManager : MonoBehaviour
 
     public void addError(string msg)
     {
+        WriteLog("Error: " + msg);
         Debug.LogError("User manager " + msg);
         if (errorText is not null)
         {
@@ -73,6 +77,7 @@ public class TextDebugManager : MonoBehaviour
 
     public void addStatus(string msg)
     {
+        WriteLog("Message: " + msg);
         Debug.Log("User manager " + msg);
         if (statusText is not null)
         {
@@ -80,5 +85,21 @@ public class TextDebugManager : MonoBehaviour
         }
     }
 
+    public void WriteLog(string text)
+    {
+        
+        try
+        {
+            string path = Path.Combine(Application.persistentDataPath, "app_log.txt");
+
+            string line = $"[{DateTime.UtcNow:yyyy-MM-dd HH:mm:ss}] {text}\n";
+
+            File.AppendAllText(path, line);
+        }
+        catch (Exception e)
+        {
+            Debug.LogError("WriteLog error: " + e.Message);
+        }
+    }
     
 }
