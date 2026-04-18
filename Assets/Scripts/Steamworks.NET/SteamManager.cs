@@ -198,8 +198,12 @@ public class SteamManager : MonoBehaviour {
 			byte[] pTicket = new byte[1024];
 			uint pcbTicket;
 
+			CSteamID steamID = SteamUser.GetSteamID();
+			
 			SteamNetworkingIdentity identity = new SteamNetworkingIdentity();
-			identity.Clear();
+			identity.SetSteamID(steamID);
+			TextDebugManager.Instance.addStatus("Steam ID: " + steamID.m_SteamID);
+			
 
 			HAuthTicket authTicket = SteamUser.GetAuthSessionTicket(
 				pTicket,
@@ -219,6 +223,7 @@ public class SteamManager : MonoBehaviour {
 				.Replace("-", "");
 			TextDebugManager.Instance.addStatus("[Steam ticket hex] " + hexTicket.Substring(0,5) + "...");
 			TextDebugManager.Instance.WriteLog("[Steam ticket hex] " + hexTicket);
+			TextDebugManager.Instance.WriteLog("[Steam ticket hex] " + pTicket);
 			
 			string base64 = Convert.ToBase64String(pTicket, 0, (int)pcbTicket);
 			TextDebugManager.Instance.addStatus("[Steam ticket base64] " + base64.Substring(0,5) + "...");
@@ -230,5 +235,14 @@ public class SteamManager : MonoBehaviour {
 			TextDebugManager.Instance.addError("Auth ticket error: " + e.Message);
 			return string.Empty;
 		}
+	}
+
+	public string GetPersonaName()
+	{
+		if (!Initialized)
+		{
+			return string.Empty;
+		}
+		return SteamFriends.GetPersonaName();
 	}
 }

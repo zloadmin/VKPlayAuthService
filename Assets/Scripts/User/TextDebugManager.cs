@@ -50,9 +50,6 @@ public class TextDebugManager : MonoBehaviour
     {
         errorText =  GameObject.Find("ErrorText").GetComponent<Text>();
         statusText =  GameObject.Find("StatusText").GetComponent<Text>();
-        addStatus("Log folder " +  Application.persistentDataPath);
-        // if (errorText is not null) errorText.text = "";
-        // if (statusText is not null) statusText.text = "";
     }
 
     public void addError(string msg, Object context)
