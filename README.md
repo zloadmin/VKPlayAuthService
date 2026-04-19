@@ -34,9 +34,13 @@
 ./bstool /Users/zloadmin/Projects/VKPlayTest/Builds/Win64_VK -src=/Users/zloadmin/Projects/VKPlayTest/Builds/Win_64/ -token=[TOKEN] -versioninfo=0.0.[VERSION]
 ```
 1 Папка с билдом  /Users/zloadmin/Projects/VKPlayTest/Builds/Win_64
+
 2 Пустая папка для сборки. (Ее нужно создать) /Users/zloadmin/Projects/VKPlayTest/Builds/Win64_VK
+
 3 [TOKEN] - скопируй здесь https://developers.vkplay.ru/dev/games/45976/distributions/
+
 4 [VERSION] - у меня последняя 11. Но тут думаю брать реальные версии сима
+
 
 ### TODO
 
