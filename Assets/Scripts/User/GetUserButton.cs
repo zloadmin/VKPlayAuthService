@@ -29,9 +29,9 @@ public class GetUserButton : MonoBehaviour
             // Show error cannot connect to vkplay or user run game by exe file (not from vkplay)
             return;
         }
-        string userName = SteamManager.Instance.GetPersonaName(); 
+         
         
-        string token = await GetAuthToken(authTicket, userName);
+        string token = await GetAuthToken(authTicket);
         if (token != string.Empty)
         {
             TextDebugManager.Instance.addStatus("Received token " + token);
@@ -46,7 +46,7 @@ public class GetUserButton : MonoBehaviour
         
     }
 
-    public async Task<string> GetAuthToken(string authTicket, string userName)
+    public async Task<string> GetAuthToken(string authTicket)
     {
         
         using var client = new HttpClient();
@@ -55,7 +55,6 @@ public class GetUserButton : MonoBehaviour
         request.Headers.Add("x-app-access-token", accessToken);
         var content = new MultipartFormDataContent();
         content.Add(new StringContent(authTicket), "auth_ticket");
-        content.Add(new StringContent(userName), "user_name");
         request.Content = content;
 
         try 
